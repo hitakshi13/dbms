@@ -1,0 +1,196 @@
+1) Custoomer account joins
+CREATE TABLE Customer (
+  C_id INT PRIMARY KEY,
+  Cname VARCHAR(50),
+  City VARCHAR(50)
+);
+
+CREATE TABLE Account (
+  Acc_id INT PRIMARY KEY,
+  C_id INT,
+  Acc_type VARCHAR(20),
+  Amount DECIMAL(10,2),
+  FOREIGN KEY (C_id) REFERENCES Customer(C_id)
+);
+
+INSERT INTO Customer VALUES 
+(1, 'Pooja', 'Pune'),
+(2, 'Ravi', 'Nashik'),
+(3, 'Amit', 'Pune');
+
+INSERT INTO Account VALUES 
+(101, 1, 'saving', 20000),
+(102, 2, 'current', 15000),
+(103, 3, 'saving', 25000);
+
+-- 1. Customers with saving account
+SELECT cname, acc_type, amount FROM Customer NATURAL JOIN Account WHERE acc_type='saving';
+
+-- 2. Display using different joins
+SELECT * FROM Customer NATURAL JOIN Account;
+SELECT * FROM Customer LEFT JOIN Account ON Customer.C_id=Account.C_id;
+SELECT * FROM Customer RIGHT JOIN Account ON Customer.C_id=Account.C_id;
+
+-- 3. Customers in same city as 'Pooja'
+SELECT * FROM Customer WHERE City=(SELECT City FROM Customer WHERE Cname='Pooja');
+
+-- 4. Accounts less than average amount
+SELECT * FROM Account WHERE Amount < (SELECT AVG(Amount) FROM Account);
+
+-- 5. C_id with maximum amount
+SELECT C_id FROM Account WHERE Amount=(SELECT MAX(Amount) FROM Account);
+
+-- 6. Minimum amount of each Acc_type
+SELECT Acc_type, Amount FROM Account 
+WHERE Amount IN (SELECT MIN(Amount) FROM Account GROUP BY Acc_type);
+
+-- 7. Amounts higher than any saving account
+SELECT Amount FROM Account WHERE Amount > ANY(SELECT Amount FROM Account WHERE Acc_type='saving');
+
+
+
+
+
+
+
+  2) Instructor and student
+
+CREATE TABLE Instructor (
+  T_ID INT PRIMARY KEY,
+  Name VARCHAR(50),
+  Dept_name VARCHAR(30),
+  Salary DECIMAL(10,2)
+);
+
+CREATE TABLE Student (
+  S_ID INT PRIMARY KEY,
+  Name VARCHAR(50),
+  Dept_name VARCHAR(30),
+  Tot_cred INT
+);
+
+CREATE TABLE Course (
+  Course_id INT PRIMARY KEY,
+  Title VARCHAR(50),
+  Dept_name VARCHAR(30),
+  Credits INT
+);
+
+-- i
+SELECT dept_name, AVG(salary)
+FROM Instructor
+GROUP BY dept_name
+HAVING AVG(salary) > 42000;
+
+-- ii
+UPDATE Instructor SET Salary = Salary * 1.10 WHERE Dept_name='Computer';
+
+-- iii
+SELECT Name FROM Instructor WHERE Name NOT IN ('Amol','Amit');
+
+-- iv
+SELECT Name FROM Student WHERE Name LIKE '%am%';
+
+-- v
+SELECT S.Name 
+FROM Student S 
+JOIN Course C ON S.Dept_name=C.Dept_name 
+WHERE C.Title='DBMS' AND S.Dept_name='Computer';
+
+
+
+
+
+3) employee nd project
+
+  -- Create Employee table
+CREATE TABLE Employee (
+  Eid INT PRIMARY KEY,
+  Ename VARCHAR(50),
+  City VARCHAR(50),
+  Salary DECIMAL(10,2),
+  Commission DECIMAL(10,2)
+);
+
+-- Create Project table
+CREATE TABLE Project (
+  Pid INT PRIMARY KEY,
+  Pname VARCHAR(50),
+  City VARCHAR(50)
+);
+
+-- Sample Data
+INSERT INTO Employee VALUES
+(1, 'Amit', 'Mumbai', 25000, NULL),
+(2, 'Ravi', 'Pune', 30000, 5000),
+(3, 'Pooja', 'Nashik', 28000, NULL);
+
+INSERT INTO Project VALUES
+(201, 'DBMS', 'Pune'),
+(202, 'AI', 'Mumbai'),
+(203, 'ML', 'Delhi');
+
+-- 1️⃣ Find different locations from where employees belong
+SELECT DISTINCT City FROM Employee;
+
+-- 2️⃣ Find maximum and minimum salary
+SELECT MAX(Salary) AS Max_Salary, MIN(Salary) AS Min_Salary FROM Employee;
+
+-- 3️⃣ Display employee data in ascending order of salary
+SELECT * FROM Employee ORDER BY Salary ASC;
+
+-- 4️⃣ Employees who live in Nashik or Pune
+SELECT Ename FROM Employee WHERE City IN ('Nashik', 'Pune');
+
+-- 5️⃣ Employees who do not get commission
+SELECT Ename FROM Employee WHERE Commission IS NULL;
+
+-- 6️⃣ Change the city of Amit to Nashik
+UPDATE Employee SET City='Nashik' WHERE Ename='Amit';
+
+-- 7️⃣ Information of employees whose name starts with 'A'
+SELECT * FROM Employee WHERE Ename LIKE 'A%';
+
+-- 8️⃣ Count of staff from Mumbai
+SELECT COUNT(*) AS Count_Mumbai FROM Employee WHERE City='Mumbai';
+
+-- 9️⃣ Count of staff from each city
+SELECT City, COUNT(*) AS Staff_Count FROM Employee GROUP BY City;
+
+-- 10️⃣ Find the address/city where employees belong AND projects are going on
+SELECT DISTINCT e.City
+FROM Employee e
+JOIN Project p
+ON e.City = p.City;
+
+-- 11️⃣ City-wise minimum salary
+SELECT City, MIN(Salary) AS Min_Salary FROM Employee GROUP BY City;
+
+-- 12️⃣ City-wise maximum salary greater than 26000
+SELECT City, MAX(Salary) AS Max_Salary 
+FROM Employee 
+GROUP BY City 
+HAVING MAX(Salary) > 26000;
+
+-- 13️⃣ Delete employee having salary greater than 30000
+DELETE FROM Employee WHERE Salary > 30000;
+
+
+
+
+
+
+
+4) employee with index and view
+
+CREATE TABLE Emp (
+  Eno INT PRIMARY KEY AUTO_INCREMENT,
+  Ename VARCHAR(50) NOT NULL,
+  Salary DECIMAL(10,2),
+  Address VARCHAR(50) DEFAULT 'Nashik',
+  Joindate DATE
+);
+
+ALTER TABLE Emp ADD Post VARCHAR(30);
+CREATE INDEX idx_name ON Emp(Ename);
+CREATE VIEW EmpView AS SELECT Ename, Salary FROM Emp;
