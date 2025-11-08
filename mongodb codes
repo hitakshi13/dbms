@@ -1,0 +1,270 @@
+1) customer
+mongosh
+use orderDB
+db.createCollection("orderinfo")
+db.orderinfo.insertMany([
+ {cust_id:123, cust_name:"abc", status:"A", price:250},
+ {cust_id:124, cust_name:"xyz", status:"B", price:500}
+])
+db.orderinfo.aggregate([
+  {$match:{status:'A'}},
+  {$group:{_id:"$cust_id", avgPrice:{$avg:"$price"}}}
+])
+db.orderinfo.find({price:{$gte:100,$lte:1000}},{status:1})
+db.orderinfo.find({}, {_id:0})
+db.orderinfo.createIndex({cust_id:1})
+
+
+
+
+
+2)movies
+
+db.movies.insertMany([
+ {name:"Movie1", type:"action", budget:1000000, producer:{name:"producer1", address:"PUNE"}}
+]);
+
+db.movies.find({budget:{$gt:100000}});
+db.movies.find({"producer.address":"PUNE"});
+db.movies.updateMany({type:"action"},{$set:{type:"horror"}});
+db.movies.find({"producer.name":"producer1"});
+
+
+
+
+
+3)institute
+
+use Institute;
+db.createCollection("Students");
+db.Students.insertMany([
+ {RollNo:1, Name:"Amit", Age:18, Branch:"CS", Address:{City:"Pune", State:"MH"}, Hobbies:["Reading","Coding"]},
+ {RollNo:2, Name:"Ravi", Age:16, Branch:"IT", Address:{City:"Nashik", State:"MH"}, Hobbies:["Music","Games"]},
+ {RollNo:3, Name:"Pooja", Age:19, Branch:"Computer", Address:{City:"Mumbai", State:"MH"}, Hobbies:["Drawing","Dancing"]},
+ {RollNo:4, Name:"Sneha", Age:17, Branch:"ENTC", Address:{City:"Nagpur", State:"MH"}, Hobbies:["Painting","Singing"]},
+ {RollNo:5, Name:"Ankit", Age:20, Branch:"Mechanical", Address:{City:"Pune", State:"MH"}, Hobbies:["Cricket","Reading"]},
+ {RollNo:6, Name:"Neha", Age:21, Branch:"Civil", Address:{City:"Kolhapur", State:"MH"}, Hobbies:["Sketching","Photography"]},
+ {RollNo:7, Name:"Rahul", Age:22, Branch:"Electrical", Address:{City:"Nashik", State:"MH"}, Hobbies:["Gaming","Movies"]},
+ {RollNo:8, Name:"Aarti", Age:19, Branch:"IT", Address:{City:"Pune", State:"MH"}, Hobbies:["Cooking","Travelling"]},
+ {RollNo:9, Name:"Karan", Age:18, Branch:"CS", Address:{City:"Nagpur", State:"MH"}, Hobbies:["Swimming","Drawing"]},
+ {RollNo:10, Name:"Tanvi", Age:20, Branch:"Computer", Address:{City:"Pune", State:"MH"}, Hobbies:["Reading","Cycling"]}
+]);
+
+
+db.Students.find();
+db.Students.find({Age:{$gt:15}});
+db.Students.find().sort({Name:1});
+db.Students.updateOne({RollNo:3},{$set:{Branch:"Computer"}});
+db.Students.deleteOne({RollNo:1});
+db.Students.find({Name:/^A/});
+db.Students.countDocuments();
+db.Students.find().limit(5);
+db.Students.find().skip(3);
+db.Students.find(
+  {"Address.City":"Pune"},
+  {Name:1, _id:0}
+);
+db.Students.find({}, {Name:1, _id:0});
+db.Students.drop();
+
+
+
+
+
+4) teacher aggregation and indexing
+
+use department;
+db.createCollection("teacher");
+db.teacher.insertMany([
+  {name:"Ravi", department:"Computer", experience:5, salary:45000},
+  {name:"Amit", department:"IT", experience:3, salary:40000},
+  {name:"Sneha", department:"Computer", experience:6, salary:50000},
+  {name:"Pooja", department:"ENTC", experience:4, salary:38000}
+]);
+
+db.teacher.aggregate([
+  {$group:{_id:"$department", avgSalary:{$avg:"$salary"}}}
+]);
+
+db.teacher.aggregate([
+  {$group:{_id:"$department", totalEmp:{$sum:1}}}
+]);
+
+db.teacher.aggregate([
+  {$group:{_id:"$department", minSalary:{$min:"$salary"}}}
+]);
+
+db.teacher.createIndex({department:1});
+db.teacher.dropIndex("department_1");
+
+
+
+
+
+5)MapReduce Population
+
+use citydb;
+
+db.city.insertMany([
+  {city:"Pune", type:"urban", state:"MH", population:5600000},
+  {city:"Nashik", type:"urban", state:"MH", population:2000000},
+  {city:"Nagpur", type:"urban", state:"MH", population:3000000},
+  {city:"Ahmedabad", type:"urban", state:"GJ", population:4000000}
+]);
+
+// Statewise population
+db.city.mapReduce(
+  function() { emit(this.state, this.population); },
+  function(key, values) { return Array.sum(values); },
+  {out:"statewise_population"}
+);
+db.statewise_population.find();
+
+// Citywise population
+db.city.mapReduce(
+  function() { emit(this.city, this.population); },
+  function(key, values) { return Array.sum(values); },
+  {out:"citywise_population"}
+);
+db.citywise_population.find();
+
+// Typewise population
+db.city.mapReduce(
+  function() { emit(this.type, this.population); },
+  function(key, values) { return Array.sum(values); },
+  {out:"typewise_population"}
+);
+db.typewise_population.find();
+
+
+
+
+6)Indexing & Aggregation college
+
+use CollegeDB;
+
+// Create and insert documents
+db.Student.insertMany([
+ {Rollno:1, name:'Navin', subject:'DMSA', marks:78},
+ {Rollno:2, name:'Anusha', subject:'OSD', marks:75},
+ {Rollno:3, name:'Ravi', subject:'TOC', marks:69},
+ {Rollno:4, name:'Veena', subject:'TOC', marks:70},
+ {Rollno:5, name:'Pravini', subject:'OSD', marks:80},
+ {Rollno:6, name:'Reena', subject:'DMSA', marks:50},
+ {Rollno:7, name:'Geeta', subject:'CN', marks:90},
+ {Rollno:8, name:'Akash', subject:'CN', marks:85}
+]);
+
+// Indexing
+db.Student.createIndex({name:1});
+db.Student.createIndex({subject:1, marks:-1});
+db.Student.createIndex({Rollno:1},{unique:true});
+db.Student.getIndexes();
+db.Student.dropIndex("name_1");
+
+// Aggregation
+db.Student.aggregate([{ $group:{ _id:"$subject", MaxMarks:{$max:"$marks"} } }]);
+db.Student.aggregate([{ $group:{ _id:"$subject", MinMarks:{$min:"$marks"} } }]);
+db.Student.aggregate([{ $group:{ _id:"$subject", SumMarks:{$sum:"$marks"} } }]);
+db.Student.aggregate([{ $group:{ _id:"$subject", AvgMarks:{$avg:"$marks"} } }]);
+db.Student.aggregate([{ $group:{ _id:"$subject", FirstRecord:{$first:"$name"} } }]);
+db.Student.aggregate([{ $group:{ _id:"$subject", LastRecord:{$last:"$name"} } }]);
+db.Student.aggregate([{ $group:{ _id:"$subject", Count:{$sum:1} } }]);
+
+
+7)orderinfo w complex index
+
+use orderDB;
+
+db.orderinfo.insertMany([
+ {cust_id:123, cust_name:"abc", status:"A", price:250},
+ {cust_id:124, cust_name:"xyz", status:"B", price:500},
+ {cust_id:125, cust_name:"pqr", status:"A", price:300}
+]);
+
+// i. Add Age field
+db.orderinfo.updateMany({}, {$set:{Age:25}});
+
+// ii. Create complex index and drop duplicates
+db.orderinfo.createIndex({cust_id:1, status:1});
+db.orderinfo.dropIndexes();
+
+// iii. Average price per customer group by status
+db.orderinfo.aggregate([
+  {$group:{_id:"$status", avgPrice:{$avg:"$price"}}}
+]);
+
+// iv. Change customer name where status = "B"
+db.orderinfo.updateMany({status:"B"}, {$set:{cust_name:"UpdatedName"}});
+
+
+
+
+
+8)orderinfo updation
+
+use orderDB;
+
+db.orderinfo.insertMany([
+ {cust_id:123, cust_name:"abc", status:"A", price:250},
+ {cust_id:124, cust_name:"xyz", status:"B", price:400}
+]);
+
+// i. Customers with price between 250 and 450
+db.orderinfo.find({price:{$gte:250,$lte:450}},{cust_name:1});
+
+// ii. Increment & decrement price
+db.orderinfo.updateOne({cust_id:123},{$inc:{price:10}});
+db.orderinfo.updateOne({cust_id:124},{$inc:{price:-5}});
+
+// iii. Remove one field
+db.orderinfo.updateOne({cust_id:123},{$unset:{status:""}});
+
+// iv. Status A or price=250
+db.orderinfo.find({$or:[{status:"A"},{price:250}]});
+
+
+
+
+
+9) java and mongodb
+
+// 1️⃣ Create / Switch to Database
+use Institute;
+
+// 2️⃣ Create Collection
+db.createCollection("Students");
+
+// 3️⃣ Insert Documents
+db.Students.insertMany([
+ {RollNo:1, Name:"Amit", Age:19, Branch:"Computer"},
+ {RollNo:2, Name:"Neha", Age:20, Branch:"IT"}
+]);
+
+// 4️⃣ Display All Documents
+db.Students.find();
+
+// 5️⃣ Update a Document
+db.Students.updateOne({RollNo:1}, {$set:{Branch:"AIML"}});
+
+// 6️⃣ Remove a Document
+db.Students.deleteOne({RollNo:2});
+
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+
+public class MongoConnection {
+    public static void main(String[] args) {
+        try {
+            // Connect to MongoDB server
+            MongoClient client = MongoClients.create("mongodb://localhost:27017");
+            System.out.println("✅ Connected to MongoDB successfully!");
+            
+            // Close connection
+            client.close();
+            System.out.println("✅ Connection closed.");
+        } catch (Exception e) {
+            System.out.println("❌ Error: " + e.getMessage());
+        }
+    }
+}
