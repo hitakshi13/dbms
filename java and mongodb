@@ -1,4 +1,6 @@
 sudo systemctl start mongod
+javac
+java
 
 
 
