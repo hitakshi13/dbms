@@ -1,3 +1,61 @@
+Steps in SQL Developer:
+
+Create the tables → run the SQL script.
+
+Insert values → run the SQL script.
+
+Open the DBMS Output panel (View → DBMS Output).
+
+Click the green + sign to enable output for your connection.
+
+Then run your PLSQL block → now the messages from DBMS_OUTPUT.PUT_LINE will appear in the panel.
+
+lsnrctl status
+lsnrctl start
+
+
+sqlplus / as sysdba
+startup;
+
+
+ALTER USER username IDENTIFIED BY newpassword;
+
+
+steps in sqlplus
+
+sqlplus
+Enter user-name: system
+Enter password: 123456
+CREATE TABLE Employee (
+    emp_id NUMBER PRIMARY KEY,
+    emp_name VARCHAR2(50),
+    salary NUMBER
+);
+INSERT INTO Employee VALUES (1, 'Hitakshi', 50000);
+INSERT INTO Employee VALUES (2, 'Rahul', 45000);
+COMMIT;
+SET SERVEROUTPUT ON;
+BEGIN
+    -- Your PL/SQL code here
+    DBMS_OUTPUT.PUT_LINE('Hello World');
+END;
+/
+SELECT * FROM Employee;
+EXIT;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 1) fine calculation
   
 CREATE TABLE Borrower(
@@ -203,4 +261,4 @@ END;
 /
 
 
-2
+
