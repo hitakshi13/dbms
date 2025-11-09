@@ -1,4 +1,5 @@
-1) Custoomer account joins
+1) Customer account joins //7 queries
+
 CREATE TABLE Customer (
   C_id INT PRIMARY KEY,
   Cname VARCHAR(50),
@@ -53,7 +54,7 @@ SELECT Amount FROM Account WHERE Amount > ANY(SELECT Amount FROM Account WHERE A
 
 
 
-  2) Instructor and student
+  2) Instructor and student //5 queries
 
 CREATE TABLE Instructor (
   T_ID INT PRIMARY KEY,
@@ -101,7 +102,100 @@ WHERE C.Title='DBMS' AND S.Dept_name='Computer';
 
 
 
-3) employee nd project
+
+
+
+3) teacher instructor //4 queries
+
+CREATE TABLE instructor (
+    T_ID INT PRIMARY KEY,
+    name VARCHAR(50),
+    dept_name VARCHAR(50),
+    salary DECIMAL(10,2)
+);
+
+CREATE TABLE student (
+    S_ID INT PRIMARY KEY,
+    name VARCHAR(50),
+    dept_name VARCHAR(50),
+    tot_cred INT
+);
+
+CREATE TABLE course (
+    course_id INT PRIMARY KEY,
+    title VARCHAR(50),
+    dept_name VARCHAR(50),
+    credits INT
+);
+
+CREATE TABLE teaches (
+    T_ID INT ,
+    course_id INT ,
+    sec_id VARCHAR(5) ,
+    semester VARCHAR(10),
+    year INT,
+    PRIMARY KEY(T_ID, course_id, sec_id, semester, year), //composite key
+    FOREIGN KEY(T_ID) REFERENCES instructor(T_ID),
+    FOREIGN KEY(course_id) REFERENCES course(course_id)
+);
+
+-- Instructor
+INSERT INTO instructor VALUES 
+(1, 'Dr. Smith', 'CS', 90000),
+(2, 'Dr. Johnson', 'Math', 85000),
+(3, 'Dr. Brown', 'Physics', 80000);
+
+-- Student
+INSERT INTO student VALUES 
+(101, 'Alice', 'CS', 30),
+(102, 'Bob', 'Math', 28),
+(103, 'Charlie', NULL, 25),
+(104, 'David', 'Physics', 32);
+
+-- Course
+INSERT INTO course VALUES
+(201, 'Data Structures', 'CS', 4),
+(202, 'Calculus', 'Math', 3),
+(203, 'Quantum Physics', 'Physics', 4);
+
+-- Teaches
+INSERT INTO teaches VALUES
+(1, 201, 'A', 'Fall', 2025),
+(2, 202, 'B', 'Fall', 2025),
+(3, 203, 'A', 'Spring', 2025),
+(1, 201, 'B', 'Spring', 2025);
+
+-- i. Names of instructors semester-wise who have taught courses
+SELECT i.name AS instructor_name, t.semester, t.course_id
+FROM instructor i
+JOIN teaches t ON i.T_ID = t.T_ID
+ORDER BY t.semester;
+
+-- ii. Create View on student table
+CREATE VIEW student_details AS
+SELECT S_ID, name, dept_name, tot_cred
+FROM student;
+
+-- iii. Rename column dept_name to department_name
+ALTER TABLE student
+CHANGE COLUMN dept_name department_name VARCHAR(50);
+
+-- iv. Delete student names whose department is NULL
+DELETE FROM student
+WHERE department_name IS NULL;
+
+-- Check student table after deletion
+SELECT * FROM student;
+
+
+
+
+
+
+
+
+
+4) employee nd project //  13 queries
 
   -- Create Employee table
 CREATE TABLE Employee (
@@ -181,7 +275,8 @@ DELETE FROM Employee WHERE Salary > 30000;
 
 
 
-4) employee with index and view
+
+5) employee with index and view // 4 queries
 
 CREATE TABLE Emp (
   Eno INT PRIMARY KEY AUTO_INCREMENT,
@@ -194,3 +289,185 @@ CREATE TABLE Emp (
 ALTER TABLE Emp ADD Post VARCHAR(30);
 CREATE INDEX idx_name ON Emp(Ename);
 CREATE VIEW EmpView AS SELECT Ename, Salary FROM Emp;
+
+
+
+
+
+
+
+
+
+
+
+
+
+6)employee works company manager //4 queries
+
+CREATE TABLE Emp (
+    emp_id INT PRIMARY KEY,
+    ename VARCHAR(50),
+    street VARCHAR(50),
+    city VARCHAR(50)
+);
+
+CREATE TABLE Company (
+    c_id INT PRIMARY KEY,
+    cname VARCHAR(50),
+    city VARCHAR(50)
+);
+
+CREATE TABLE works (
+    emp_id INT,
+    c_id INT,
+    ename VARCHAR(50),
+    cname VARCHAR(50),
+    sal DECIMAL(10,2),
+    PRIMARY KEY(emp_id, c_id),
+    FOREIGN KEY(emp_id) REFERENCES Emp(emp_id),
+    FOREIGN KEY(c_id) REFERENCES Company(c_id)
+);
+
+CREATE TABLE Manager (
+    mgr_id INT PRIMARY KEY,
+    mgrname VARCHAR(50)
+);
+
+-- Employees
+INSERT INTO Emp VALUES 
+(1, 'Alice', 'Street A', 'Mumbai'),
+(2, 'Bob', 'Street B', 'Pune'),
+(3, 'Charlie', 'Street C', 'Delhi');
+
+-- Companies
+INSERT INTO Company VALUES
+(101, 'ABC', 'Mumbai'),
+(102, 'Mbank', 'Pune'),
+(103, 'Bosch', 'Pune'),
+(104, 'SBC', 'Delhi');
+
+-- Works
+INSERT INTO works VALUES
+(1, 101, 'Alice', 'ABC', 18000),
+(2, 102, 'Bob', 'Mbank', 22000),
+(3, 103, 'Charlie', 'Bosch', 25000),
+(2, 104, 'Bob', 'SBC', 60000);
+
+-- Managers
+INSERT INTO Manager VALUES
+(1, 'Manager1'),
+(2, 'Manager2');
+
+-- i. Modify the database so that a particular company (ABC) is now in Pune
+UPDATE Company
+SET city = 'Pune'
+WHERE cname = 'ABC';
+
+-- ii. Give all managers of Mbank a 10% raise. If salary > 20000, give only 3% raise
+UPDATE works
+SET sal = CASE
+             WHEN sal > 20000 THEN sal * 1.03
+             ELSE sal * 1.10
+          END
+WHERE cname = 'Mbank';
+
+-- iii. Find names of all employees who work in 'Bosch' company in city Pune
+SELECT e.ename
+FROM Emp e
+JOIN works w ON e.emp_id = w.emp_id
+JOIN Company c ON w.c_id = c.c_id
+WHERE c.cname = 'Bosch' AND c.city = 'Pune';
+
+-- iv. Delete all records in works table for employees of SBC Company whose salary > 50000
+DELETE FROM works
+WHERE cname = 'SBC' AND sal > 50000;
+
+-- Check works table after deletion
+SELECT * FROM works;
+
+
+
+
+
+
+
+
+
+
+7) employee posn duty //4 queries
+
+CREATE TABLE Empl (
+    e_no INT PRIMARY KEY,
+    e_name VARCHAR(50),
+    post VARCHAR(50),
+    pay_rate DECIMAL(10,2)
+);
+
+CREATE TABLE Position (
+    pos_no INT PRIMARY KEY,
+    post VARCHAR(50)
+);
+
+CREATE TABLE Duty_alloc (
+    pos_no INT,
+    e_no INT,
+    month VARCHAR(20),
+    year INT,
+    shift INT,
+    PRIMARY KEY(pos_no, e_no, month, year, shift),
+    FOREIGN KEY(pos_no) REFERENCES Position(pos_no),
+    FOREIGN KEY(e_no) REFERENCES Empl(e_no)
+);
+
+-- Employees
+INSERT INTO Empl VALUES
+(101, 'Sachin', 'Manager', 25000),
+(102, 'Rahul', 'Manager', 22000),
+(103, 'Anita', 'Clerk', 18000),
+(123, 'Kiran', 'Clerk', 20000),
+(104, 'Neha', 'Manager', 27000);
+
+-- Positions
+INSERT INTO Position VALUES
+(1, 'Manager'),
+(2, 'Clerk'),
+(3, 'Supervisor');
+
+-- Duty Allocations
+INSERT INTO Duty_alloc VALUES
+(1, 101, 'April', 2003, 1),
+(1, 102, 'April', 2003, 1),
+(2, 103, 'April', 2003, 2),
+(2, 123, 'April', 2003, 1),
+(3, 104, 'April', 2003, 1);
+
+
+-- i. Duty allocation details for e_no 123 for the first shift in April 2003
+SELECT *
+FROM Duty_alloc
+WHERE e_no = 123 AND month = 'April' AND year = 2003 AND shift = 1;
+
+-- ii. Employees whose rate of pay >= rate of pay of employee 'Sachin'
+SELECT *
+FROM Empl
+WHERE pay_rate >= (SELECT pay_rate FROM Empl WHERE e_name = 'Sachin');
+
+-- iii. Create a view for displaying min, max, and average salary for all posts
+CREATE VIEW salary_stats AS
+SELECT post,
+       MIN(pay_rate) AS min_salary,
+       MAX(pay_rate) AS max_salary,
+       AVG(pay_rate) AS avg_salary
+FROM Empl
+GROUP BY post;
+
+-- To see the view
+SELECT * FROM salary_stats;
+
+-- iv. Count of different employees on each shift having post ‘Manager’
+SELECT d.shift, COUNT(DISTINCT d.e_no) AS emp_count
+FROM Duty_alloc d
+JOIN Empl e ON d.e_no = e.e_no
+WHERE e.post = 'Manager'
+GROUP BY d.shift;
+
