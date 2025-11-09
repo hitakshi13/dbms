@@ -227,44 +227,4 @@ db.orderinfo.find({$or:[{status:"A"},{price:250}]});
 
 
 
-9) java and mongodb
 
-// 1️⃣ Create / Switch to Database
-use Institute;
-
-// 2️⃣ Create Collection
-db.createCollection("Students");
-
-// 3️⃣ Insert Documents
-db.Students.insertMany([
- {RollNo:1, Name:"Amit", Age:19, Branch:"Computer"},
- {RollNo:2, Name:"Neha", Age:20, Branch:"IT"}
-]);
-
-// 4️⃣ Display All Documents
-db.Students.find();
-
-// 5️⃣ Update a Document
-db.Students.updateOne({RollNo:1}, {$set:{Branch:"AIML"}});
-
-// 6️⃣ Remove a Document
-db.Students.deleteOne({RollNo:2});
-
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-
-public class MongoConnection {
-    public static void main(String[] args) {
-        try {
-            // Connect to MongoDB server
-            MongoClient client = MongoClients.create("mongodb://localhost:27017");
-            System.out.println("✅ Connected to MongoDB successfully!");
-            
-            // Close connection
-            client.close();
-            System.out.println("✅ Connection closed.");
-        } catch (Exception e) {
-            System.out.println("❌ Error: " + e.getMessage());
-        }
-    }
-}
