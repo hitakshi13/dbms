@@ -1,0 +1,59 @@
+import com.mongodb.client.*;
+import org.bson.Document;
+
+public class MongoConnect {
+    public static void main(String[] args) {
+        try {
+            // 1️⃣ Connect to MongoDB server (localhost, default port 27017)
+            MongoClient client = MongoClients.create("mongodb://localhost:27017");
+            System.out.println("✅ Connected to MongoDB successfully!");
+
+            // 2️⃣ Create or access the database
+            MongoDatabase db = client.getDatabase("Institute");
+            System.out.println("✅ Database created: Institute");
+
+            // 3️⃣ Create or access the collection
+            MongoCollection<Document> collection = db.getCollection("Students");
+            System.out.println("✅ Collection created: Students");
+
+            // 4️⃣ Insert Documents
+            collection.insertOne(new Document("RollNo", 1)
+                                 .append("Name", "Amit")
+                                 .append("Age", 18)
+                                 .append("Branch", "CS"));
+            collection.insertOne(new Document("RollNo", 2)
+                                 .append("Name", "Ravi")
+                                 .append("Age", 19)
+                                 .append("Branch", "IT"));
+            System.out.println("✅ Documents inserted.");
+
+            // 5️⃣ Display Data
+            System.out.println("\n📘 Students Data:");
+            for (Document doc : collection.find()) {
+                System.out.println(doc.toJson());
+            }
+
+            // 6️⃣ Update a Document
+            collection.updateOne(new Document("RollNo", 1),
+                                 new Document("$set", new Document("Branch", "AIML")));
+            System.out.println("✅ Document updated (RollNo 1 → AIML).");
+
+            // 7️⃣ Remove a Document
+            collection.deleteOne(new Document("RollNo", 2));
+            System.out.println("✅ Document deleted (RollNo 2).");
+
+            // 8️⃣ Display Remaining Data
+            System.out.println("\n📘 Updated Students Data:");
+            for (Document doc : collection.find()) {
+                System.out.println(doc.toJson());
+            }
+
+            // Close connection
+            client.close();
+            System.out.println("\n✅ Connection closed.");
+
+        } catch (Exception e) {
+            System.out.println("❌ Error: " + e.getMessage());
+        }
+    }
+}
