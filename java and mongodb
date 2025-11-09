@@ -1,3 +1,8 @@
+sudo systemctl start mongod
+
+
+
+
 import com.mongodb.client.*;
 import org.bson.Document;
 
