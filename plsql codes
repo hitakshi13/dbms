@@ -14,6 +14,14 @@ CREATE TABLE Fine(
   Amt NUMBER
 );
 
+INSERT INTO Borrower (Rollin, Name, DateOfIssue, NameOfBook, Status) 
+VALUES 
+(101, 'Alice', '2025-11-01', 'Data Structures', 'I'),
+(102, 'Bob', '2025-11-05', 'Database Systems', 'I');
+
+
+
+
 DECLARE
   v_roll Borrower.Rollin%TYPE;
   v_book Borrower.NameOfBook%TYPE;
