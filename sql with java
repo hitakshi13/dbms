@@ -1,3 +1,129 @@
+import java.sql.*;
+import java.util.Scanner;
+
+class EmployeeDB {
+  public static void main(String[] args) {
+    try {
+      Class.forName("com.mysql.cj.jdbc.Driver");
+      Connection con = DriverManager.getConnection(
+          "jdbc:mysql://localhost:3306/dbms_lab", "comp", "comp@123");
+      Statement st = con.createStatement();
+
+      System.out.println("✅ Connected to MySQL!\n");
+
+      // 1. Create table
+      st.executeUpdate("CREATE TABLE IF NOT EXISTS Employee(SSN INT PRIMARY KEY, Ename VARCHAR(50), State VARCHAR(50), Salary DECIMAL(10,2))");
+      System.out.println("✅ Table created.");
+
+      // 2. Insert records
+      st.executeUpdate("INSERT INTO Employee VALUES(1,'Amit','MH',35000)");
+      st.executeUpdate("INSERT INTO Employee VALUES(2,'Neha','Gujrat',40000)");
+      st.executeUpdate("INSERT INTO Employee VALUES(3,'Ravi','MH',38000)");
+      System.out.println("✅ Records inserted.");
+
+      // 3. Retrieve by SSN
+      Scanner sc = new Scanner(System.in);
+      System.out.print("Enter SSN to search: ");
+      int ssn = sc.nextInt();
+      ResultSet rs = st.executeQuery("SELECT * FROM Employee WHERE SSN=" + ssn);
+      while (rs.next())
+        System.out.println(rs.getInt(1) + " " + rs.getString(2) + " " + rs.getString(3) + " " + rs.getDouble(4));
+
+      // 4. Update MH → TN
+      int up = st.executeUpdate("UPDATE Employee SET State='TN' WHERE State='MH'");
+      System.out.println("✅ " + up + " record(s) updated.");
+
+      // 5. Delete from Gujrat
+      int del = st.executeUpdate("DELETE FROM Employee WHERE State='Gujrat'");
+      System.out.println("✅ " + del + " record(s) deleted.");
+
+      con.close();
+      System.out.println("\n✅ Connection closed.");
+
+    } catch (Exception e) {
+      System.out.println("❌ Error: " + e.getMessage());
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 1) employee simple
 
 -- 1️⃣ Create table
